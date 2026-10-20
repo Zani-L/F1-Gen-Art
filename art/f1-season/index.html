@@ -1,5 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>F1 Season Canvas</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: the painting hangs on a cool gallery wall; a wall label (caption + controls) sits beside it; the palette workbench runs full width below. */
@@ -98,6 +102,8 @@ h1 { font-size: clamp(26px, 2.4vw, 38px); line-height: 1.05; font-weight: 600; l
 
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
+</head>
+<body>
 
 <main class="page">
   <section class="stage">
@@ -451,3 +457,5 @@ h1 { font-size: clamp(26px, 2.4vw, 38px); line-height: 1.05; font-weight: 600; l
   } else { window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { fullBuild(false); }, 80); }); }
 })();
 </script>
+</body>
+</html>
