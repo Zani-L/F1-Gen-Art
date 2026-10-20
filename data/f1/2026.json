@@ -1,0 +1,236 @@
+{
+ "season": 2026,
+ "rounds": [
+  {
+   "n": 1,
+   "name": "Australian Grand Prix",
+   "date": "2026-03-08",
+   "race": [
+    "RUS",
+    "ANT",
+    "LEC"
+   ]
+  },
+  {
+   "n": 2,
+   "name": "Chinese Grand Prix",
+   "date": "2026-03-15",
+   "race": [
+    "ANT",
+    "RUS",
+    "HAM"
+   ],
+   "sprint": [
+    "RUS",
+    "LEC",
+    "HAM"
+   ]
+  },
+  {
+   "n": 3,
+   "name": "Japanese Grand Prix",
+   "date": "2026-03-29",
+   "race": [
+    "ANT",
+    "PIA",
+    "LEC"
+   ]
+  },
+  {
+   "n": 4,
+   "name": "Miami Grand Prix",
+   "date": "2026-05-03",
+   "race": [
+    "ANT",
+    "NOR",
+    "PIA"
+   ],
+   "sprint": [
+    "NOR",
+    "PIA",
+    "LEC"
+   ]
+  },
+  {
+   "n": 5,
+   "name": "Canadian Grand Prix",
+   "date": "2026-05-24",
+   "race": [
+    "ANT",
+    "HAM",
+    "VER"
+   ],
+   "sprint": [
+    "RUS",
+    "NOR",
+    "ANT"
+   ]
+  },
+  {
+   "n": 6,
+   "name": "Monaco Grand Prix",
+   "date": "2026-06-07",
+   "race": [
+    "ANT",
+    "HAM",
+    "HAD"
+   ]
+  },
+  {
+   "n": 7,
+   "name": "Barcelona Grand Prix",
+   "date": "2026-06-14",
+   "race": [
+    "HAM",
+    "RUS",
+    "NOR"
+   ]
+  },
+  {
+   "n": 8,
+   "name": "Austrian Grand Prix",
+   "date": "2026-06-28",
+   "race": [
+    "RUS",
+    "VER",
+    "ANT"
+   ]
+  },
+  {
+   "n": 9,
+   "name": "British Grand Prix",
+   "date": "2026-07-05",
+   "race": [
+    "LEC",
+    "RUS",
+    "HAM"
+   ],
+   "sprint": [
+    "ANT",
+    "HAM",
+    "NOR"
+   ]
+  },
+  {
+   "n": 10,
+   "name": "Belgian Grand Prix",
+   "date": "2026-07-19",
+   "race": [
+    "ANT",
+    "LEC",
+    "VER"
+   ]
+  },
+  {
+   "n": 11,
+   "name": "Hungarian Grand Prix",
+   "date": "2026-07-26",
+   "race": [
+    "NOR",
+    "VER",
+    "ANT"
+   ]
+  },
+  {
+   "n": 12,
+   "name": "Dutch Grand Prix",
+   "date": "2026-08-23",
+   "race": [
+    "NOR",
+    "ANT",
+    "RUS"
+   ],
+   "sprint": [
+    "RUS",
+    "LEC",
+    "NOR"
+   ]
+  },
+  {
+   "n": 13,
+   "name": "Italian Grand Prix",
+   "date": "2026-09-06",
+   "race": [
+    "ANT",
+    "RUS",
+    "VER"
+   ]
+  },
+  {
+   "n": 14,
+   "name": "Spanish Grand Prix",
+   "date": "2026-09-13",
+   "race": [
+    "ANT",
+    "VER",
+    "NOR"
+   ]
+  },
+  {
+   "n": 15,
+   "name": "Azerbaijan Grand Prix",
+   "date": "2026-09-26",
+   "race": [
+    "RUS",
+    "VER",
+    "HAD"
+   ]
+  },
+  {
+   "n": 16,
+   "name": "Bahrain Grand Prix in Malaysia",
+   "date": "2026-10-04",
+   "race": [
+    "VER",
+    "ANT",
+    "HAM"
+   ]
+  },
+  {
+   "n": 17,
+   "name": "Singapore Grand Prix",
+   "date": "2026-10-11",
+   "race": [
+    "VER",
+    "LEC",
+    "ANT"
+   ],
+   "sprint": [
+    "VER",
+    "HAM",
+    "LEC"
+   ]
+  },
+  {
+   "n": 18,
+   "name": "United States Grand Prix",
+   "date": "2026-10-25"
+  },
+  {
+   "n": 19,
+   "name": "Mexico City Grand Prix",
+   "date": "2026-11-01"
+  },
+  {
+   "n": 20,
+   "name": "Brazilian Grand Prix",
+   "date": "2026-11-08"
+  },
+  {
+   "n": 21,
+   "name": "Las Vegas Grand Prix",
+   "date": "2026-11-22"
+  },
+  {
+   "n": 22,
+   "name": "Qatar Grand Prix",
+   "date": "2026-11-29"
+  },
+  {
+   "n": 23,
+   "name": "Abu Dhabi Grand Prix",
+   "date": "2026-12-06"
+  }
+ ],
+ "updated": "2026-10-20T11:37:22.653Z"
+}
