@@ -1,0 +1,453 @@
+<title>F1 Season Canvas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the painting hangs on a cool gallery wall; a wall label (caption + controls) sits beside it; the palette workbench runs full width below. */
+:root {
+  --wall: #E8E8E5;
+  --ink: #1E1F23;
+  --muted: #686A71;
+  --line: #CBCBC6;
+  --panel: #F2F2EF;
+  --font-display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --wall: #151518; --ink: #E8E7E4; --muted: #9A9BA1; --line: #34353A; --panel: #1D1D21;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --wall: #151518; --ink: #E8E7E4; --muted: #9A9BA1; --line: #34353A; --panel: #1D1D21;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--wall); color: var(--ink);
+  font-family: var(--font-display); font-size: 15px; line-height: 1.5;
+  padding-block: 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.page { max-width: 1760px; margin: 0 auto; display: grid; gap: 56px; }
+.stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+@media (min-width: 900px) {
+  .stage { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: clamp(24px, 3vw, 56px); align-items: start; }
+  .frame { width: 100%; aspect-ratio: auto; height: calc(100vh - 64px); }
+  .label { position: sticky; top: 32px; max-height: calc(100vh - 64px); overflow-y: auto; padding-right: 4px; }
+}
+.frame {
+  position: relative; width: 100%; aspect-ratio: 1; background: #E9E3D6;
+  box-shadow: 0 1px 0 rgba(0,0,0,.08), 0 24px 44px -22px rgba(0,0,0,.45);
+}
+.frame::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .22; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+#cv { display: block; width: 100%; height: 100%; }
+.cells { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.cells .crow { flex: 1; display: flex; min-height: 0; }
+.cells .crow button { flex: 1; min-width: 0; }
+.cells button {
+  appearance: none; background: transparent; border: 0; padding: 0; margin: 0; cursor: pointer;
+  mix-blend-mode: difference;
+}
+.cells button:hover, .cells button:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+.cells button.on { outline: 2px solid #fff; outline-offset: -2px; }
+.cells button.reserve { cursor: default; }
+
+.label { display: grid; gap: 28px; align-content: start; }
+h1 { font-size: clamp(26px, 2.4vw, 38px); line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.status { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin: 8px 0 0; letter-spacing: .01em; }
+.cap { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 14px; min-height: 240px; align-content: start; }
+.cap-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.cap-round { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.cap-name { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; }
+.cap-date { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); gap: 18px 24px; }
+.sec-title { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 0 0 6px; }
+.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.rows li { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.chip { width: 14px; height: 14px; display: block; border-radius: 1px; box-shadow: inset 0 0 0 1px rgba(128,128,128,.35); }
+.who { min-width: 0; }
+.who b { font-weight: 600; }
+.who span { color: var(--muted); font-size: 13px; margin-left: 6px; }
+.pct { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pending { color: var(--muted); font-size: 14px; margin: 0; max-width: 34ch; }
+
+.controls { display: grid; gap: 18px; border-top: 1px solid var(--line); padding-top: 16px; }
+.ctl-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); display: block; margin-bottom: 6px; }
+.seg { display: inline-flex; border: 1px solid var(--ink); border-radius: 2px; overflow: hidden; }
+.seg button {
+  font: inherit; font-size: 14px; padding: 8px 14px; border: 0; background: transparent; color: var(--ink); cursor: pointer;
+}
+.seg button + button { border-left: 1px solid var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--wall); }
+.seg button:focus-visible, .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.slider { display: flex; align-items: center; gap: 12px; }
+.slider input { flex: 1; min-width: 0; accent-color: var(--ink); }
+.slider output { font-family: var(--font-mono); font-size: 12px; width: 3.5ch; text-align: right; font-variant-numeric: tabular-nums; }
+.btn {
+  font: inherit; font-size: 14px; padding: 8px 14px; background: transparent; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 2px; cursor: pointer;
+}
+.btn:hover { border-color: var(--ink); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<main class="page">
+  <section class="stage">
+    <div class="frame" id="frame">
+      <canvas id="cv" role="img" aria-label="Painting of the 2026 Formula 1 season. Each rectangle is one race weekend, filled with a gradient of the podium colours."></canvas>
+      <div class="cells" id="cells"></div>
+    </div>
+
+    <div class="label">
+      <header>
+        <p class="status" style="margin:0 0 10px"><a href="../../" style="color:inherit">&larr; Gallery</a></p>
+        <h1>F1 Season Canvas</h1>
+        <p class="status" id="status"></p>
+      </header>
+
+      <div class="cap" id="cap" aria-live="polite"></div>
+
+      <div class="controls">
+        <div>
+          <span class="ctl-label" id="lblmode">Colours by</span>
+          <div class="seg" role="group" aria-labelledby="lblmode">
+            <button type="button" id="m-dri" aria-pressed="true">Drivers</button>
+            <button type="button" id="m-con" aria-pressed="false">Constructors</button>
+          </div>
+        </div>
+        <div>
+          <label class="ctl-label" for="soft">Edge softness</label>
+          <div class="slider"><input type="range" id="soft" min="20" max="100" step="5" value="100"><output id="softv" for="soft">100</output></div>
+        </div>
+        <div class="btn-row"><button type="button" class="btn" id="replay">Replay the season</button></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  /* ---------- data ---------- */
+  var TEAMS = [
+    { id: 'mercedes', name: 'Mercedes', drivers: ['RUS', 'ANT'], src: '#00A19B', note: 'Brand colour. Silver #C8CCCE.', canvas: '#78B0A8' },
+    { id: 'ferrari', name: 'Ferrari', drivers: ['LEC', 'HAM'], src: '#EF1A2D', note: 'Red. Yellow #FFF200.', canvas: '#A93B49' },
+    { id: 'mclaren', name: 'McLaren', drivers: ['NOR', 'PIA'], src: '#FF8000', note: 'No official hex. Broadcast #F58020.', canvas: '#E8A164' },
+    { id: 'red_bull', name: 'Red Bull', drivers: ['VER', 'HAD'], src: '#1E5BC6', note: 'Broadcast blue. 2026 car is deep navy, no hex found.', canvas: '#1D2747' },
+    { id: 'williams', name: 'Williams', drivers: ['ALB', 'SAI'], src: '#00A0DE', note: 'Sky blue. Broadcast #37BEDD.', canvas: '#6F8DB8' },
+    { id: 'alpine', name: 'Alpine', drivers: ['GAS', 'COL'], src: '#2173B8', note: 'Blue. Red #E12319. Pink not sourced.', canvas: '#E4A9BA' },
+    { id: 'aston_martin', name: 'Aston Martin', drivers: ['ALO', 'STR'], src: '#002420', note: 'Dark green. Broadcast #2D826D.', canvas: '#2F5446' },
+    { id: 'haas', name: 'Haas', drivers: ['BEA', 'OCO'], src: '#E6002B', note: 'Red. Car is mostly white.', canvas: '#CFC8BC' },
+    { id: 'audi', name: 'Audi', drivers: ['HUL', 'BOR'], src: '#F50537', note: 'Audi red, third-party site. Silver not sourced.', canvas: '#AEB4BC' },
+    { id: 'cadillac', name: 'Cadillac', drivers: ['PER', 'BOT'], src: '#1F1F27', note: 'Third-party team colour. Livery is black and white.', canvas: '#2A2A30' },
+    { id: 'rb', name: 'Racing Bulls', drivers: ['LAW', 'LIN'], src: null, note: 'No hex found. White, black and blue.', canvas: '#B9CBE3' }
+  ];
+  var DRIVERS = {
+    RUS: 'Russell', ANT: 'Antonelli', LEC: 'Leclerc', HAM: 'Hamilton', NOR: 'Norris', PIA: 'Piastri',
+    VER: 'Verstappen', HAD: 'Hadjar', LAW: 'Lawson', LIN: 'Lindblad', BEA: 'Bearman', OCO: 'Ocon',
+    GAS: 'Gasly', COL: 'Colapinto', ALB: 'Albon', SAI: 'Sainz', ALO: 'Alonso', STR: 'Stroll',
+    HUL: 'Hülkenberg', BOR: 'Bortoleto', PER: 'Pérez', BOT: 'Bottas'
+  };
+  var teamOf = {}, teamName = {};
+  TEAMS.forEach(function (t) { teamName[t.id] = t.name; t.drivers.forEach(function (d) { teamOf[d] = t.id; }); });
+
+  // done rounds carry podiums; sprint weekends carry a sprint podium too
+  var ROUNDS = [
+    { n: 1, name: 'Australian Grand Prix', date: '2026-03-08', race: ['RUS', 'ANT', 'LEC'] },
+    { n: 2, name: 'Chinese Grand Prix', date: '2026-03-15', race: ['ANT', 'RUS', 'HAM'], sprint: ['RUS', 'LEC', 'HAM'] },
+    { n: 3, name: 'Japanese Grand Prix', date: '2026-03-29', race: ['ANT', 'PIA', 'LEC'] },
+    { n: 4, name: 'Miami Grand Prix', date: '2026-05-03', race: ['ANT', 'NOR', 'PIA'], sprint: ['NOR', 'PIA', 'LEC'] },
+    { n: 5, name: 'Canadian Grand Prix', date: '2026-05-24', race: ['ANT', 'HAM', 'VER'], sprint: ['RUS', 'NOR', 'ANT'] },
+    { n: 6, name: 'Monaco Grand Prix', date: '2026-06-07', race: ['ANT', 'HAM', 'HAD'] },
+    { n: 7, name: 'Barcelona Grand Prix', date: '2026-06-14', race: ['HAM', 'RUS', 'NOR'] },
+    { n: 8, name: 'Austrian Grand Prix', date: '2026-06-28', race: ['RUS', 'VER', 'ANT'] },
+    { n: 9, name: 'British Grand Prix', date: '2026-07-05', race: ['LEC', 'RUS', 'HAM'], sprint: ['ANT', 'HAM', 'NOR'] },
+    { n: 10, name: 'Belgian Grand Prix', date: '2026-07-19', race: ['ANT', 'LEC', 'VER'] },
+    { n: 11, name: 'Hungarian Grand Prix', date: '2026-07-26', race: ['NOR', 'VER', 'ANT'] },
+    { n: 12, name: 'Dutch Grand Prix', date: '2026-08-23', race: ['NOR', 'ANT', 'RUS'], sprint: ['RUS', 'LEC', 'NOR'] },
+    { n: 13, name: 'Italian Grand Prix', date: '2026-09-06', race: ['ANT', 'RUS', 'VER'] },
+    { n: 14, name: 'Spanish Grand Prix', date: '2026-09-13', race: ['ANT', 'VER', 'NOR'] },
+    { n: 15, name: 'Azerbaijan Grand Prix', date: '2026-09-26', race: ['RUS', 'VER', 'HAD'] },
+    { n: 16, name: 'Bahrain Grand Prix in Malaysia', date: '2026-10-04', race: ['VER', 'ANT', 'HAM'] },
+    { n: 17, name: 'Singapore Grand Prix', date: '2026-10-11', race: ['VER', 'LEC', 'ANT'], sprint: ['VER', 'HAM', 'LEC'] },
+    { n: 18, name: 'United States Grand Prix', date: '2026-10-25' },
+    { n: 19, name: 'Mexico City Grand Prix', date: '2026-11-01' },
+    { n: 20, name: 'Brazilian Grand Prix', date: '2026-11-08' },
+    { n: 21, name: 'Las Vegas Grand Prix', date: '2026-11-22' },
+    { n: 22, name: 'Qatar Grand Prix', date: '2026-11-29' },
+    { n: 23, name: 'Abu Dhabi Grand Prix', date: '2026-12-06' }
+  ];
+  ROUNDS.forEach(function (r) { r.done = !!r.race; });
+  var CELLS = ROUNDS.slice(), ROWS = [8, 8, 7]; // 23 rounds: two rows of 8, last row of 7 wider cells
+  var TOTAL = ROUNDS.length, DONE, LATEST;
+  function recount() { DONE = ROUNDS.filter(function (r) { return r.done; }).length; LATEST = Math.max(0, DONE - 1); }
+  recount(); // hardcoded rounds above are the fallback; data/f1/2026.json overrides them at load
+
+  /* ---------- colour maths ---------- */
+  function hexToRgb(h) { h = h.replace('#', ''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+  function rgbToHex(c) { return '#' + c.map(function (v) { return ('0' + Math.round(v).toString(16)).slice(-2); }).join('').toUpperCase(); }
+  function s2l(c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+  function l2s(c) { c = c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055; return Math.round(Math.min(1, Math.max(0, c)) * 255); }
+  function toLab(rgb) {
+    var r = s2l(rgb[0]), g = s2l(rgb[1]), b = s2l(rgb[2]);
+    var l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+    var m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+    var s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+    return [0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s, 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s];
+  }
+  function fromLab(c) {
+    var l = Math.pow(c[0] + 0.3963377774 * c[1] + 0.2158037573 * c[2], 3);
+    var m = Math.pow(c[0] - 0.1055613458 * c[1] - 0.0638541728 * c[2], 3);
+    var s = Math.pow(c[0] - 0.0894841775 * c[1] - 1.2914855480 * c[2], 3);
+    return [l2s(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s), l2s(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s), l2s(-0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s)];
+  }
+  function mixLab(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  function smoother(u) { u = Math.min(1, Math.max(0, u)); return u * u * u * (u * (u * 6 - 15) + 10); }
+  function rgbToHsl(c) {
+    var r = c[0] / 255, g = c[1] / 255, b = c[2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), h = 0, s = 0, l = (mx + mn) / 2;
+    if (mx !== mn) {
+      var d = mx - mn; s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+      if (mx === r) h = (g - b) / d + (g < b ? 6 : 0); else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return [h, s, l];
+  }
+  function hslToRgb(h, s, l) {
+    h = ((h % 360) + 360) % 360 / 360;
+    function f(p, q, t) { if (t < 0) t += 1; if (t > 1) t -= 1; if (t < 1 / 6) return p + (q - p) * 6 * t; if (t < 1 / 2) return q; if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6; return p; }
+    if (s === 0) return [l * 255, l * 255, l * 255];
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+    return [f(p, q, h + 1 / 3) * 255, f(p, q, h) * 255, f(p, q, h - 1 / 3) * 255];
+  }
+  function variant(hex) {
+    var hsl = rgbToHsl(hexToRgb(hex));
+    var l = hsl[2] > 0.62 ? hsl[2] - 0.14 : hsl[2] + 0.14;
+    return rgbToHex(hslToRgb(hsl[0] + 10, hsl[1], Math.min(0.92, Math.max(0.08, l))));
+  }
+
+  /* ---------- state ---------- */
+  var state = { mode: 'drivers', soft: 1, palette: {}, dPal: {}, sel: LATEST };
+  var defaults = {};
+  TEAMS.forEach(function (t) { defaults[t.id] = t.canvas; state.palette[t.id] = t.canvas; });
+  var driverColor = {};
+  function recompute() {
+    TEAMS.forEach(function (t) { var b = state.palette[t.id]; driverColor[t.drivers[0]] = state.dPal[t.drivers[0]] || b; driverColor[t.drivers[1]] = state.dPal[t.drivers[1]] || variant(b); });
+  }
+  recompute();
+  function colorFor(code) { return (state.mode === 'constructors' ? state.palette[teamOf[code]] : driverColor[code]) || '#999999'; }
+
+  /* ---------- painting ---------- */
+  var DARK_CREAM = toLab(hexToRgb('#D2C8B4')), LIGHT_CREAM = toLab(hexToRgb('#F2EEE5'));
+  function mk(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+  function bandsFor(r) {
+    var sprint = !!r.sprint;
+    var pcts = sprint ? [10, 10, 10, 30, 25, 15] : [45, 35, 20];
+    var order = sprint ? r.sprint.concat(r.race) : r.race;
+    return order.map(function (code, i) { return { h: pcts[i] / 100, pct: pcts[i], color: colorFor(code) }; });
+  }
+  function paintCell(bands, w, h, soft) {
+    var c = mk(w, h), x = c.getContext('2d');
+    var labs = bands.map(function (b) { return toLab(hexToRgb(b.color)); });
+    var edges = [0]; bands.forEach(function (b) { edges.push(edges[edges.length - 1] + b.h); });
+    for (var y = 0; y < h; y++) {
+      var t = (y + 0.5) / h, k = 0;
+      while (k < bands.length - 1 && t >= edges[k + 1]) k++;
+      var lab = labs[k];
+      for (var j = 1; j < bands.length; j++) {
+        var hw = soft * Math.min(bands[j - 1].h, bands[j].h) / 2;
+        if (hw > 0 && Math.abs(t - edges[j]) < hw) {
+          lab = mixLab(labs[j - 1], labs[j], smoother((t - (edges[j] - hw)) / (2 * hw)));
+          break;
+        }
+      }
+      var rgb = fromLab(lab);
+      x.fillStyle = 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+      x.fillRect(0, y, w, 1);
+    }
+    return c;
+  }
+  function paintBlank(i, w, h) {
+    var c = mk(w, h), x = c.getContext('2d');
+    var a = i % 2 === 0 ? DARK_CREAM : LIGHT_CREAM, b = i % 2 === 0 ? LIGHT_CREAM : DARK_CREAM;
+    for (var y = 0; y < h; y++) {
+      var rgb = fromLab(mixLab(a, b, smoother((y + 0.5) / h)));
+      x.fillStyle = 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+      x.fillRect(0, y, w, 1);
+    }
+    return c;
+  }
+
+  /* ---------- canvas plumbing ---------- */
+  var frame = document.getElementById('frame'), cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  var W = 0, H = 0, rects = [], blankImgs = [], filledImgs = [], shown = [], target = [], anim = null, raf = 0;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function layout() {
+    var css = frame.clientWidth; if (!css) return false;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.round(css * dpr); H = Math.round(frame.clientHeight * dpr);
+    cv.width = W; cv.height = H;
+    rects = [];
+    ROWS.forEach(function (n, row) {
+      var y0 = Math.round(row * H / ROWS.length), y1 = Math.round((row + 1) * H / ROWS.length);
+      for (var col = 0; col < n; col++) {
+        var x0 = Math.round(col * W / n), x1 = Math.round((col + 1) * W / n);
+        rects.push({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+      }
+    });
+    return true;
+  }
+  function buildBlank() { blankImgs = CELLS.map(function (c, i) { return paintBlank(i, rects[i].w, rects[i].h); }); }
+  function buildFilled() {
+    filledImgs = CELLS.map(function (c, i) {
+      return c && c.done ? paintCell(bandsFor(c), rects[i].w, rects[i].h, state.soft) : blankImgs[i];
+    });
+  }
+  var alphas = [];
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < CELLS.length; i++) {
+      var r = rects[i];
+      ctx.globalAlpha = 1; ctx.drawImage(shown[i], r.x, r.y);
+      var a = alphas[i];
+      if (a > 0 && target[i] !== shown[i]) { ctx.globalAlpha = a; ctx.drawImage(target[i], r.x, r.y); }
+    }
+    ctx.globalAlpha = 1;
+  }
+  function ease(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+  function tick(now) {
+    if (!anim) return;
+    var done = true;
+    for (var i = 0; i < CELLS.length; i++) {
+      var p = (now - anim.start - i * anim.stagger) / anim.duration;
+      alphas[i] = ease(Math.min(1, Math.max(0, p)));
+      if (p < 1) done = false;
+    }
+    draw();
+    if (done) { shown = target.slice(); anim = null; alphas = alphas.map(function () { return 0; }); draw(); return; }
+    raf = requestAnimationFrame(tick);
+  }
+  function show(next, opts) {
+    cancelAnimationFrame(raf); anim = null;
+    if (!opts || reduce || !opts.duration) {
+      shown = next.slice(); target = next.slice(); alphas = next.map(function () { return 0; }); draw(); return;
+    }
+    if (opts.from) shown = opts.from.slice(); else shown = target.slice();
+    target = next.slice();
+    alphas = next.map(function () { return 0; });
+    anim = { start: performance.now(), stagger: opts.stagger || 0, duration: opts.duration };
+    raf = requestAnimationFrame(tick);
+  }
+  function fullBuild(animate) {
+    if (!layout()) return;
+    buildBlank(); buildFilled();
+    if (animate) show(filledImgs, { from: blankImgs, duration: 1500, stagger: 70 });
+    else show(filledImgs);
+  }
+  function repaint() { buildFilled(); show(filledImgs); renderCaption(state.sel); }
+
+  /* ---------- overlay cells ---------- */
+  var cellsEl = document.getElementById('cells'), cellBtns = [];
+  CELLS.forEach(function (c, i) {
+    var b = document.createElement('button'); b.type = 'button';
+    if (c) {
+      b.setAttribute('aria-label', 'Round ' + c.n + ', ' + c.name + (c.done ? '' : ', upcoming'));
+      var pick = function () { select(i); };
+      b.addEventListener('mouseenter', pick); b.addEventListener('focus', pick); b.addEventListener('click', pick);
+    } else { b.className = 'reserve'; b.setAttribute('aria-label', 'Reserve cell, no round assigned'); b.tabIndex = -1; }
+    cellBtns.push(b);
+  });
+  (function () { var k = 0; ROWS.forEach(function (n) { var rw = document.createElement('div'); rw.className = 'crow'; for (var j = 0; j < n; j++) rw.appendChild(cellBtns[k++]); cellsEl.appendChild(rw); }); })();
+  function select(i) {
+    state.sel = i;
+    renderCaption(i);
+  }
+
+  /* ---------- caption ---------- */
+  var capEl = document.getElementById('cap');
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function fmtDate(s) { var p = s.split('-'); return parseInt(p[2], 10) + ' ' + MONTHS[parseInt(p[1], 10) - 1] + ' ' + p[0]; }
+  function listHtml(title, codes, pcts) {
+    var li = codes.map(function (code, i) {
+      return '<li><span class="chip" style="background:' + colorFor(code) + '"></span><span class="who"><b>' + (DRIVERS[code] || code) + '</b><span>' + (teamName[teamOf[code]] || '') + '</span></span><span class="pct">' + ['1st', '2nd', '3rd'][i] + '</span></li>';
+    }).join('');
+    return '<div><h3 class="sec-title">' + title + '</h3><ul class="rows">' + li + '</ul></div>';
+  }
+  function renderCaption(i) {
+    var r = CELLS[i]; if (!r) return;
+    var head = '<div class="cap-head"><span class="cap-round">Round ' + r.n + ' of ' + TOTAL + '</span><span class="cap-name">' + r.name + '</span><span class="cap-date">' + fmtDate(r.date) + '</span></div>';
+    var body;
+    if (!r.done) {
+      body = '<p class="pending">Not raced yet. This rectangle fills with the podium colours once the result is in.</p>';
+    } else if (r.sprint) {
+      body = '<div class="cols">' + listHtml('Sprint Race Result', r.sprint, [10, 10, 10]) + listHtml('Grand Prix Result', r.race, [30, 25, 15]) + '</div>';
+    } else {
+      body = '<div class="cols">' + listHtml('Grand Prix Result', r.race, [45, 35, 20]) + '</div>';
+    }
+    capEl.innerHTML = head + body;
+  }
+
+  /* ---------- status ---------- */
+  function setStatus() {
+    var lastR = ROUNDS[LATEST];
+    document.getElementById('status').textContent = DONE ? DONE + ' of ' + TOTAL + ' rounds painted. Latest: ' + lastR.name.replace(' Grand Prix', ' GP') + ', ' + fmtDate(lastR.date) + '.' : 'Season not started.';
+  }
+  setStatus();
+
+  /* ---------- controls ---------- */
+  var bCon = document.getElementById('m-con'), bDri = document.getElementById('m-dri');
+  function setMode(m) {
+    if (state.mode === m) return;
+    var before = filledImgs.slice();
+    state.mode = m;
+    bCon.setAttribute('aria-pressed', m === 'constructors'); bDri.setAttribute('aria-pressed', m === 'drivers');
+    buildFilled(); show(filledImgs, { from: before, duration: 700, stagger: 15 });
+    renderCaption(state.sel);
+  }
+  bCon.addEventListener('click', function () { setMode('constructors'); });
+  bDri.addEventListener('click', function () { setMode('drivers'); });
+  var soft = document.getElementById('soft'), softv = document.getElementById('softv');
+  soft.addEventListener('input', function () { state.soft = soft.value / 100; softv.textContent = soft.value; repaint(); });
+  document.getElementById('replay').addEventListener('click', function () { show(filledImgs, { from: blankImgs, duration: 2400, stagger: 100 }); });
+
+  /* ---------- boot ---------- */
+  // palette.json (same folder) and data/f1/2026.json override the built-in defaults; if either can't load, the built-in ones above are used
+  var HEX = /^#[0-9a-f]{6}$/i;
+  function start() { recount(); state.sel = LATEST; recompute(); setStatus(); renderCaption(state.sel); fullBuild(true); }
+  function getJson(url) { return fetch(url, { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
+  function applyPalette(p) {
+    if (!p) return;
+    TEAMS.forEach(function (t) {
+      if (p.teams && HEX.test(p.teams[t.id] || '')) state.palette[t.id] = p.teams[t.id];
+      t.drivers.forEach(function (d) { if (p.drivers && HEX.test(p.drivers[d] || '')) state.dPal[d] = p.drivers[d]; });
+    });
+  }
+  function applyData(d) {
+    if (!d || !d.rounds) return;
+    d.rounds.forEach(function (x) {
+      var r = ROUNDS[x.n - 1]; if (!r) return;
+      r.name = x.name || r.name; r.date = x.date || r.date;
+      r.race = x.race && x.race.length === 3 ? x.race : undefined;
+      r.sprint = r.race && x.sprint && x.sprint.length === 3 ? x.sprint : undefined;
+      r.done = !!r.race;
+    });
+  }
+  if (window.fetch) {
+    Promise.all([getJson('palette.json'), getJson('../../data/f1/2026.json')]).then(function (res) { applyPalette(res[0]); applyData(res[1]); start(); });
+  } else { start(); }
+  var rt = 0;
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () {
+      var d = Math.min(window.devicePixelRatio || 1, 2); if (Math.round(frame.clientWidth * d) === W && Math.round(frame.clientHeight * d) === H) return;
+      clearTimeout(rt); rt = setTimeout(function () { fullBuild(false); }, 80);
+    }).observe(frame);
+  } else { window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { fullBuild(false); }, 80); }); }
+})();
+</script>

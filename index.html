@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generative Data Art</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root { --wall:#E8E8E5; --ink:#1E1F23; --muted:#686A71; --line:#CBCBC6; --font-display:'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif; --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace; }
+@media (prefers-color-scheme: dark) { :root { --wall:#151518; --ink:#E8E7E4; --muted:#9A9BA1; --line:#34353A; color-scheme:dark; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--wall); color:var(--ink); font-family:var(--font-display); font-size:15px; line-height:1.5; padding:48px 16px; }
+main { max-width:1100px; margin:0 auto; }
+h1 { font-size:clamp(28px,4vw,44px); line-height:1.05; letter-spacing:-.02em; margin:0 0 8px; font-weight:600; }
+.sub { color:var(--muted); margin:0 0 40px; max-width:52ch; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr)); gap:24px; }
+.card { display:block; color:inherit; text-decoration:none; border-top:1px solid var(--line); padding-top:14px; }
+.card:hover h2, .card:focus-visible h2 { text-decoration:underline; }
+.card h2 { font-size:20px; margin:0 0 4px; font-weight:600; letter-spacing:-.01em; }
+.card p { margin:0 0 8px; color:var(--muted); }
+.meta { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Generative Data Art</h1>
+  <p class="sub">Artworks that paint themselves from real-world data. Open to everyone.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+fetch('artworks.json').then(function (r) { return r.json(); }).then(function (list) {
+  var g = document.getElementById('grid');
+  list.forEach(function (a) {
+    var el = document.createElement('a'); el.className = 'card'; el.href = a.path;
+    var h = document.createElement('h2'); h.textContent = a.title;
+    var p = document.createElement('p'); p.textContent = a.description;
+    var m = document.createElement('span'); m.className = 'meta'; m.textContent = a.data + ' · ' + a.status;
+    el.appendChild(h); el.appendChild(p); el.appendChild(m); g.appendChild(el);
+  });
+}).catch(function () { document.getElementById('grid').textContent = 'Could not load the artwork list.'; });
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "f1-season",
+    "title": "F1 Season Canvas",
+    "path": "art/f1-season/",
+    "description": "Each race weekend of the Formula 1 season is one rectangle, painted in the colours of the podium.",
+    "data": "Jolpica-F1 API",
+    "status": "live"
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "_help": "teams: colour of each team (also used in Constructors view). drivers: optional colour per driver in Drivers view. Leave a driver as empty quotes to get an automatic lighter shift of the team colour.",
+  "teams": {
+    "mercedes": "#78B0A8",
+    "ferrari": "#A93B49",
+    "mclaren": "#E8A164",
+    "red_bull": "#1D2747",
+    "williams": "#6F8DB8",
+    "alpine": "#E4A9BA",
+    "aston_martin": "#2F5446",
+    "haas": "#CFC8BC",
+    "audi": "#AEB4BC",
+    "cadillac": "#2A2A30",
+    "rb": "#B9CBE3"
+  },
+  "drivers": {
+    "RUS": "", "ANT": "", "LEC": "", "HAM": "", "NOR": "", "PIA": "",
+    "VER": "", "HAD": "", "ALB": "", "SAI": "", "GAS": "", "COL": "",
+    "ALO": "", "STR": "", "BEA": "", "OCO": "", "HUL": "", "BOR": "",
+    "PER": "", "BOT": "", "LAW": "", "LIN": ""
+  }
+}
